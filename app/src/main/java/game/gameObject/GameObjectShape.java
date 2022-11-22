@@ -1,4 +1,4 @@
-package game.gameObject.objects;
+package game.gameObject;
 
 public enum GameObjectShape {
     ELLIPTICAL,

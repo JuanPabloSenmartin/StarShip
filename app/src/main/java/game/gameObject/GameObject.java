@@ -1,19 +1,19 @@
 package game.gameObject;
 
-import game.gameObject.objects.GameObjectShape;
-
 public abstract class GameObject {
     private final String id;
     private final GameObjectType type;
     private double xPosition;
     private double yPosition;
     private double rotation;
+    private double direction;
     private boolean isHiding;
-    private final double height;
-    private final double width;
+    private double height;
+    private double width;
     private final GameObjectShape shape;
+    private final Color color;
 
-    public GameObject(String id, GameObjectType type, double initialPositionX, double initialPositionY, double initialRotation, boolean isHiding, double height, double width, GameObjectShape shape) {
+    public GameObject(String id, GameObjectType type, double initialPositionX, double initialPositionY, double initialRotation, boolean isHiding, double height, double width, GameObjectShape shape, double direction, Color color) {
         this.id = id;
         this.type = type;
         this.xPosition = initialPositionX;
@@ -23,15 +23,18 @@ public abstract class GameObject {
         this.width = width;
         this.shape = shape;
         this.isHiding = isHiding;
+        this.direction = direction;
+        this.color = color;
     }
 
     public Double[] getValues(){
-        return new Double[]{xPosition, yPosition, rotation};
+        return new Double[]{xPosition, yPosition, rotation, height, width};
     }
     public void hide(){
         //puts object outside of viewer's scope
-        this.xPosition = 700;
-        this.yPosition = 700;
+        double[] pos = NonVisibleObjectsManager.getEmptyPlace();
+        this.xPosition = pos[0];
+        this.yPosition = pos[1];
         this.isHiding = true;
     }
     public abstract void update();
@@ -86,5 +89,31 @@ public abstract class GameObject {
 
     public void setHiding(boolean hiding) {
         isHiding = hiding;
+    }
+
+    public double getDirection() {
+        return direction;
+    }
+
+    public void setDirection(double direction) {
+        this.direction = direction;
+    }
+    public boolean isInsideLimit(){
+        return xPosition > 0 && xPosition < 800 && yPosition > 0 && yPosition < 800;
+    }
+    public boolean isInsideLimit(double xPosition, double yPosition){
+        return xPosition > 0 && xPosition < 800 && yPosition > 0 && yPosition < 800;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public Color getColor() {
+        return color;
     }
 }

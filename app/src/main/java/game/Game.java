@@ -9,18 +9,24 @@ import game.gameObject.objects.Ship;
 import java.util.List;
 import java.util.Objects;
 
+
 public class Game {
     private List<GameObject> gameObjects;
+    private List<Player> players;
+    private boolean isPaused;
 
     public void start(){
-        this.gameObjects = GameObjectsGenerator.generate(3, 3, 1);
+        this.players = PlayerGenerator.generate(2);
+        this.gameObjects = GameObjectsGenerator.generate(10, 20, players.size(), players);
+        this.isPaused = false;
     }
     public void shoot(int ship){
         if (ship < gameObjects.size() && gameObjects.get(ship).getClass().equals(Ship.class)){
             for (GameObject gameObject : gameObjects){
+                Ship bulletsShip = (Ship) gameObjects.get(ship);
                 if (gameObject.getType() == GameObjectType.BULLET){
                     Bullet bullet = (Bullet) gameObject;
-                    if (bullet.isHiding() && Objects.equals(bullet.getShipId(), gameObjects.get(ship).getId())) {
+                    if (bullet.isHiding() && Objects.equals(bullet.getShipId(), gameObjects.get(ship).getId()) && bullet.getColor() == bulletsShip.getColor()) {
                         bullet.shoot();
                         break;
                     }
@@ -29,25 +35,68 @@ public class Game {
         }
     }
     public void moveShip(int shipNum, double shiftX, double shiftY){
-        if (shipNum < gameObjects.size() && gameObjects.get(shipNum).getClass().equals(Ship.class)){
+        if (shipNum < gameObjects.size() && gameObjects.get(shipNum).getType() == GameObjectType.STARSHIP && !isPaused){
             Ship ship = (Ship) gameObjects.get(shipNum);
             ship.move(shiftX, shiftY);
         }
     }
     public void rotateShip(int shipNum, double rotation){
-        if (shipNum < gameObjects.size() && gameObjects.get(shipNum).getClass().equals(Ship.class)){
+        if (shipNum < gameObjects.size() && gameObjects.get(shipNum).getType() == GameObjectType.STARSHIP && !isPaused){
             Ship ship = (Ship) gameObjects.get(shipNum);
             ship.rotate(rotation);
         }
     }
-
-    public void update(){
+    public void handleCollision(String id1, String id2){
+        GameObject first = null;
+        GameObject second = null;
         for (GameObject gameObject : gameObjects){
-            gameObject.update();
+            if (gameObject.getId().equals(id1)) first = gameObject;
+            if (gameObject.getId().equals(id2)) second = gameObject;
+        }
+        if (first != null && second != null && !first.isHiding() && !second.isHiding()){
+            CollisionHandler.handleCollision(first, second, gameObjects, players);
+        }
+    }
+    public void update(){
+        if (!isPaused){
+            MeteorGenerator.manageMeteorGeneration(gameObjects);
+            for (GameObject gameObject : gameObjects){
+                gameObject.update();
+            }
+        }
+    }
+    public boolean hasFinished(){
+        for (Player player: players){
+            if (player.isAlive()) return false;
+        }
+        return true;
+    }
+    public void printLeaderBoard(){
+        System.out.println("LEADERBOARD");
+        for (Player player : players){
+            System.out.println(player.getId() + " = " + player.getPoints() + " points");
+            System.out.println("-----------------------------------------------");
         }
     }
 
     public List<GameObject> getGameObjects() {
         return gameObjects;
+    }
+
+    public List<Player> getPlayers() {
+        return players;
+    }
+    public void pauseOrResumeGame(){
+        this.isPaused = !isPaused;
+    }
+    public void resetGame(){
+        this.start();
+    }
+
+    public boolean isPaused() {
+        return isPaused;
+    }
+    public void saveGame(){
+        System.out.println("saving");
     }
 }

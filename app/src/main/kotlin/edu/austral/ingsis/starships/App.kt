@@ -3,8 +3,10 @@ package edu.austral.ingsis.starships
 import game.Game
 import edu.austral.ingsis.starships.ui.*
 import edu.austral.ingsis.starships.ui.ElementColliderType.*
+import game.gameObject.GameObject
 import game.gameObject.GameObjectType
-import game.gameObject.objects.GameObjectShape
+import game.gameObject.Color
+import game.gameObject.GameObjectShape
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.scene.Scene
@@ -19,26 +21,27 @@ class Starships() : Application() {
     private val imageResolver = CachedImageResolver(DefaultImageResolver())
     private val facade = ElementsViewFacade(imageResolver)
     private val keyTracker = KeyTracker()
+    private var paused = false
 
     companion object {
-        val STARSHIP_IMAGE_REF = ImageRef("starship", 70.0, 70.0)
+        val STARSHIP_RED = ImageRef("starship_red", 70.0, 70.0)
+        val STARSHIP_BLUE = ImageRef("starship_blue", 70.0, 70.0)
+        val BULLET_RED = ImageRef("bullet_red", 70.0, 70.0)
+        val BULLET_BLUE = ImageRef("bullet_blue", 70.0, 70.0)
+        val METEOR = ImageRef("meteor", 70.0, 70.0)
         val game = Game()
     }
 
     override fun start(primaryStage: Stage) {
         game.start();
         val gameObjects = game.gameObjects
-        var starship = ElementModel("starship", 300.0, 300.0, 40.0, 40.0, 180.0, Triangular, STARSHIP_IMAGE_REF)
         for (gameObject in gameObjects){
-
-            val element = ElementModel(gameObject.id, gameObject.getxPosition(), gameObject.getyPosition(), gameObject.height, gameObject.width, gameObject.rotation, adaptShape(gameObject.shape), getImage(gameObject.type))
-            facade.elements[gameObject.id] = element
-            if (gameObject.type.equals(GameObjectType.STARSHIP)) starship = element
+            facade.elements[gameObject.id] = ElementModel(gameObject.id, gameObject.getxPosition(), gameObject.getyPosition(), gameObject.height, gameObject.width, gameObject.rotation, adaptShape(gameObject.shape), getImage(gameObject))
         }
 
-        facade.timeListenable.addEventListener(TimeListener(facade.elements, game))
+        facade.timeListenable.addEventListener(TimeListener(facade.elements, game, this))
         facade.collisionsListenable.addEventListener(CollisionListener(game))
-        keyTracker.keyPressedListenable.addEventListener(KeyPressedListener(starship, game))
+        keyTracker.keyPressedListenable.addEventListener(KeyPressedListener(game, this))
 
         val scene = Scene(facade.view)
         keyTracker.scene = scene
@@ -51,7 +54,6 @@ class Starships() : Application() {
         keyTracker.start()
         primaryStage.show()
     }
-
     override fun stop() {
         facade.stop()
         keyTracker.stop()
@@ -63,17 +65,21 @@ class Starships() : Application() {
             GameObjectShape.TRIANGULAR -> Triangular
         }
     }
-    fun getImage(type : GameObjectType) : ImageRef? {
-        return when(type){
-            GameObjectType.STARSHIP -> STARSHIP_IMAGE_REF
-            GameObjectType.BULLET -> null
-            GameObjectType.METEOR -> null
-        }
+    fun getImage(gameObject: GameObject) : ImageRef? {
+        return if (gameObject.type == GameObjectType.STARSHIP && gameObject.color == Color.RED) STARSHIP_RED
+        else if(gameObject.type == GameObjectType.STARSHIP && gameObject.color == Color.BLUE) STARSHIP_BLUE
+        else if (gameObject.type == GameObjectType.BULLET && gameObject.color == Color.RED) BULLET_RED
+        else if (gameObject.type == GameObjectType.BULLET && gameObject.color == Color.BLUE) BULLET_BLUE
+        else METEOR
     }
 }
 
-class TimeListener(private val elements: Map<String, ElementModel>, private val game: Game) : EventListener<TimePassed> {
+class TimeListener(private val elements: Map<String, ElementModel>, private val game: Game, private val starships: Starships) : EventListener<TimePassed> {
     override fun handle(event: TimePassed) {
+        if(game.hasFinished()) {
+            game.printLeaderBoard()
+            game.resetGame()
+        }
         game.update()
         val gameObjects = game.gameObjects;
         for (gameObject in gameObjects){
@@ -83,6 +89,8 @@ class TimeListener(private val elements: Map<String, ElementModel>, private val 
                 element.x.set(values[0])
                 element.y.set(values[1])
                 element.rotationInDegrees.set(values[2])
+                element.height.set(values[3])
+                element.width.set(values[4])
             }
         }
     }
@@ -90,22 +98,39 @@ class TimeListener(private val elements: Map<String, ElementModel>, private val 
 
 class CollisionListener(private val game: Game) : EventListener<Collision> {
     override fun handle(event: Collision) {
-        println("${event.element1Id} ${event.element2Id}")
+//        println("${event.element1Id} ${event.element2Id}")
+        game.handleCollision(event.element1Id, event.element2Id)
     }
 
 }
 
-class KeyPressedListener(private val starship: ElementModel, private val game: Game): EventListener<KeyPressed> {
+class KeyPressedListener(private val game: Game, private val starships: Starships): EventListener<KeyPressed> {
     override fun handle(event: KeyPressed) {
         when(event.key) {
             KeyCode.W -> game.moveShip(0, 0.0, -5.0)
-            KeyCode.S -> game.moveShip(0, 0.0, 5.0)
+            KeyCode.S -> {
+                if (game.isPaused) game.saveGame()
+                else game.moveShip(0, 0.0, 5.0)
+            }
             KeyCode.A -> game.moveShip(0, -5.0, 0.0)
             KeyCode.D -> game.moveShip(0, 5.0, 0.0)
             KeyCode.LEFT -> game.rotateShip(0, -5.0)
             KeyCode.RIGHT -> game.rotateShip(0, 5.0)
             KeyCode.SPACE -> game.shoot(0)
+            KeyCode.P -> game.pauseOrResumeGame()
             else -> {}
+        }
+        if (game.players.size == 2){
+            when(event.key) {
+                KeyCode.T -> game.moveShip(1, 0.0, -5.0)
+                KeyCode.G -> game.moveShip(1, 0.0, 5.0)
+                KeyCode.F -> game.moveShip(1, -5.0, 0.0)
+                KeyCode.H -> game.moveShip(1, 5.0, 0.0)
+                KeyCode.J -> game.rotateShip(1, -5.0)
+                KeyCode.K -> game.rotateShip(1, 5.0)
+                KeyCode.L -> game.shoot(1)
+                else -> {}
+            }
         }
     }
 
