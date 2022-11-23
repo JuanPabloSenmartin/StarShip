@@ -7,11 +7,14 @@ import game.gameObject.GameObjectType;
 
 public class Meteor extends GameObject {
     private boolean clockwise;
-    private boolean used;
+
     public Meteor(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, double direction) {
         super(id, GameObjectType.METEOR, initialPositionX, initialPositionY, initialRotation, true, initialHeight, initialWidth, GameObjectShape.ELLIPTICAL, direction, Color.RED);
         this.clockwise = true;
-        this.used = false;
+    }
+    public Meteor(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, double direction, boolean clockwise, boolean isHiding) {
+        super(id, GameObjectType.METEOR, initialPositionX, initialPositionY, initialRotation, isHiding, initialHeight, initialWidth, GameObjectShape.ELLIPTICAL, direction, Color.RED);
+        this.clockwise = clockwise;
     }
 
     @Override
@@ -43,5 +46,9 @@ public class Meteor extends GameObject {
 
     public void setClockwise(boolean clockwise){
         this.clockwise = clockwise;
+    }
+
+    public boolean isClockwise() {
+        return clockwise;
     }
 }

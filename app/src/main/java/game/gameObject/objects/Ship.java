@@ -6,13 +6,18 @@ import game.gameObject.GameObjectShape;
 import game.gameObject.GameObjectType;
 
 public class Ship extends GameObject {
-    long lastBulletShot;
+    private long lastBulletShot;
     private final String playerId;
 
     public Ship(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, String playerId, Color color) {
         super(id, GameObjectType.STARSHIP, initialPositionX, initialPositionY, initialRotation, false, initialHeight, initialWidth, GameObjectShape.TRIANGULAR, 0, color);
         this.playerId = playerId;
         this.lastBulletShot = System.currentTimeMillis();
+    }
+    public Ship(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, String playerId, Color color, long lastBulletShot, boolean isHiding, double direction) {
+        super(id, GameObjectType.STARSHIP, initialPositionX, initialPositionY, initialRotation, isHiding, initialHeight, initialWidth, GameObjectShape.TRIANGULAR, direction, color);
+        this.playerId = playerId;
+        this.lastBulletShot = lastBulletShot;
     }
 
     @Override
@@ -43,5 +48,7 @@ public class Ship extends GameObject {
         return playerId;
     }
 
-
+    public long getLastBulletShot() {
+        return lastBulletShot;
+    }
 }

@@ -33,7 +33,7 @@ class Starships() : Application() {
     }
 
     override fun start(primaryStage: Stage) {
-        game.start();
+        game.start(true);
         val gameObjects = game.gameObjects
         for (gameObject in gameObjects){
             facade.elements[gameObject.id] = ElementModel(gameObject.id, gameObject.getxPosition(), gameObject.getyPosition(), gameObject.height, gameObject.width, gameObject.rotation, adaptShape(gameObject.shape), getImage(gameObject))

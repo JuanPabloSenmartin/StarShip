@@ -11,6 +11,10 @@ public class Bullet extends GameObject {
         super(id, GameObjectType.BULLET, initialPositionX, initialPositionY, initialRotation, true, initialHeight, initialWidth, GameObjectShape.RECTANGULAR, direction, color);
         this.ship = ship;
     }
+    public Bullet(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, Ship ship, double direction, Color color, boolean isHiding) {
+        super(id, GameObjectType.BULLET, initialPositionX, initialPositionY, initialRotation, isHiding, initialHeight, initialWidth, GameObjectShape.RECTANGULAR, direction, color);
+        this.ship = ship;
+    }
     public String getShipId(){
         return ship.getId();
     }

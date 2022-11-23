@@ -1,5 +1,6 @@
 package game;
 
+import game.config.ConfigManager;
 import game.gameObject.GameObject;
 import game.gameObject.GameObjectType;
 import game.gameObject.GameObjectsGenerator;
@@ -15,10 +16,19 @@ public class Game {
     private List<Player> players;
     private boolean isPaused;
 
-    public void start(){
+    public void start(boolean initializeFromSavedState){
+        if (initializeFromSavedState) loadSavedGame();
+        else loadNewGame();
+        this.isPaused = false;
+    }
+    private void loadSavedGame(){
+        GameState gameState = ConfigManager.getSavedGameState();
+        this.gameObjects = gameState.getGameObjects();
+        this.players = gameState.getPlayers();
+    }
+    private void loadNewGame(){
         this.players = PlayerGenerator.generate(2);
         this.gameObjects = GameObjectsGenerator.generate(10, 20, players.size(), players);
-        this.isPaused = false;
     }
     public void shoot(int ship){
         if (ship < gameObjects.size() && gameObjects.get(ship).getClass().equals(Ship.class)){
@@ -90,13 +100,13 @@ public class Game {
         this.isPaused = !isPaused;
     }
     public void resetGame(){
-        this.start();
+        //this.start(false);
     }
 
     public boolean isPaused() {
         return isPaused;
     }
     public void saveGame(){
-        System.out.println("saving");
+        ConfigManager.saveGameState(new GameState(gameObjects, players));
     }
 }

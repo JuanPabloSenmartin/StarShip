@@ -16,6 +16,14 @@ public class Player {
         this.alive = true;
     }
 
+    public Player(String id, int points, int lives, Ship ship, boolean alive) {
+        this.id = id;
+        this.points = points;
+        this.lives = lives;
+        this.ship = ship;
+        this.alive = alive;
+    }
+
     public String getId() {
         return id;
     }
@@ -48,6 +56,9 @@ public class Player {
 
     public boolean isAlive() {
         return alive;
+    }
+    public String getShipId(){
+        return ship.getId();
     }
 
     public void setAlive(boolean alive) {
