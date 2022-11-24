@@ -9,10 +9,10 @@ public class Player {
     private Ship ship;
     private boolean alive;
 
-    public Player(String id) {
+    public Player(String id, int amountOfLives) {
         this.id = id;
         this.points = 0;
-        this.lives = 3;
+        this.lives = amountOfLives;
         this.alive = true;
     }
 

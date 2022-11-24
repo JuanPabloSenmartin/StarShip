@@ -102,7 +102,7 @@ public abstract class GameObject {
         return xPosition > 0 && xPosition < 800 && yPosition > 0 && yPosition < 800;
     }
     public boolean isInsideLimit(double xPosition, double yPosition){
-        return xPosition > 0 && xPosition < 800 && yPosition > 0 && yPosition < 800;
+        return xPosition > 0 && xPosition < 725 && yPosition > 0 && yPosition < 700;
     }
 
     public void setHeight(double height) {

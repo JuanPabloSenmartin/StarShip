@@ -12,7 +12,8 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConfigManager {
+public class ConfigManager extends Config{
+
     public static void saveGameState(GameState gameState){
         writeGameStateInFile(gameState.getGameObjects(), gameState.getPlayers());
     }
@@ -74,7 +75,7 @@ public class ConfigManager {
     }
 
     public static GameState getSavedGameState() {
-        List<String> configLines = getConfigLines();
+        List<String> configLines = getLines(getDirectory());
         List<String> o = null;
         List<String> p = null;
         for (int i = 0; i < configLines.size(); i++) {
@@ -90,19 +91,6 @@ public class ConfigManager {
         return new GameState(gameObjects, players);
     }
 
-    private static List<String> getConfigLines() {
-        List<String> lines = new ArrayList<>();
-        try (BufferedReader reader = new BufferedReader(new FileReader(getDirectory()))){
-            String line;
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return lines;
-    }
 
     private static List<Player> getSavedPlayers(List<String> lines,  List<GameObject> gameObjects) {
         List<Player> players = new ArrayList<>();

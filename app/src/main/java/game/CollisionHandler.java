@@ -1,6 +1,5 @@
 package game;
 
-import game.Player;
 import game.gameObject.GameObject;
 import game.gameObject.GameObjectType;
 import game.gameObject.objects.Bullet;
@@ -22,7 +21,7 @@ public class CollisionHandler {
         }
         else if ((first.getType() == GameObjectType.STARSHIP && second.getType() == GameObjectType.METEOR) || (second.getType() == GameObjectType.STARSHIP && first.getType() == GameObjectType.METEOR)){
             //ship and meteor collision
-            manageShipMeteorCollision(first, second, players, gameObjects);
+            manageShipMeteorCollision(first, second, players);
         }
     }
     private static void manageBulletShipCollision(GameObject first, GameObject second, List<Player> players){
@@ -60,11 +59,14 @@ public class CollisionHandler {
             meteor = (Meteor) first;
         }
         Player player = getPlayer(bullet.getShipId(), players, gameObjects);
-        player.addPoints(1);
-        meteor.hide();
         bullet.hide();
+        meteor.takeDamage(bullet.getDamage());
+        if (meteor.getCurrentHealthBar() < 0){
+            player.addPoints(meteor.getPoints());
+            meteor.hide();
+        }
     }
-    private static void manageShipMeteorCollision(GameObject first, GameObject second, List<Player> players, List<GameObject> gameObjects){
+    private static void manageShipMeteorCollision(GameObject first, GameObject second, List<Player> players){
         Ship ship;
         Meteor meteor;
         if (first.getType() == GameObjectType.STARSHIP){

@@ -15,7 +15,10 @@ public class MeteorGenerator {
         if (getAmountOfVisibleMeteors(gameObjects) < 5){
             //adds meteor
             for (GameObject gameObject : gameObjects){
-                if (gameObject.getType().equals(GameObjectType.METEOR) && gameObject.isHiding()) putOnScreen((Meteor) gameObject, getShipsList(gameObjects));
+                if (gameObject.getType().equals(GameObjectType.METEOR) && gameObject.isHiding()) {
+                    putOnScreen((Meteor) gameObject, getShipsList(gameObjects));
+                    break;
+                }
             }
         }
     }
@@ -47,11 +50,11 @@ public class MeteorGenerator {
             case 2 -> {
                 //meteor comes from bottom of screen
                 x = n;
-                y = 800;
+                y = 794;
             }
             default -> {
                 //meteor comes from right of screen
-                x = 800;
+                x = 794;
                 y = n;
             }
         }
@@ -73,9 +76,9 @@ public class MeteorGenerator {
         meteor.setxPosition(x);
         meteor.setyPosition(y);
         meteor.setClockwise(random.nextBoolean());
-        double n = random.nextDouble(30, 100);
-        meteor.setWidth(n*2);
-        meteor.setWidth(n);
+        meteor.setWidth(random.nextDouble(50, 150));
+        meteor.setHeight(random.nextDouble(50, 150));
+        meteor.setInitialHealthBar(meteor.calculateHealthBar());
     }
 
     private static int getAmountOfVisibleMeteors(List<GameObject> gameObjects){

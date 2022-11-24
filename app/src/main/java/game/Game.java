@@ -1,13 +1,16 @@
 package game;
 
 import game.config.ConfigManager;
+import game.config.GameConfiguration;
 import game.gameObject.GameObject;
 import game.gameObject.GameObjectType;
 import game.gameObject.GameObjectsGenerator;
 import game.gameObject.objects.Bullet;
 import game.gameObject.objects.Ship;
+import javafx.scene.input.KeyCode;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 
@@ -15,6 +18,11 @@ public class Game {
     private List<GameObject> gameObjects;
     private List<Player> players;
     private boolean isPaused;
+    private final GameConfiguration gameConfiguration;
+
+    public Game() {
+        this.gameConfiguration = new GameConfiguration();
+    }
 
     public void start(boolean initializeFromSavedState){
         if (initializeFromSavedState) loadSavedGame();
@@ -27,11 +35,14 @@ public class Game {
         this.players = gameState.getPlayers();
     }
     private void loadNewGame(){
-        this.players = PlayerGenerator.generate(2);
-        this.gameObjects = GameObjectsGenerator.generate(10, 20, players.size(), players);
+        this.players = PlayerGenerator.generate(gameConfiguration);
+        this.gameObjects = GameObjectsGenerator.generate(10, 20, players.size(), players, gameConfiguration);
+    }
+    public Map<String, KeyCode> getKeyBoardConfig(){
+        return gameConfiguration.getKeyboardConfiguration();
     }
     public void shoot(int ship){
-        if (ship < gameObjects.size() && gameObjects.get(ship).getClass().equals(Ship.class)){
+        if (ship < gameObjects.size() && gameObjects.get(ship).getType() == GameObjectType.STARSHIP){
             for (GameObject gameObject : gameObjects){
                 Ship bulletsShip = (Ship) gameObjects.get(ship);
                 if (gameObject.getType() == GameObjectType.BULLET){
@@ -44,10 +55,10 @@ public class Game {
             }
         }
     }
-    public void moveShip(int shipNum, double shiftX, double shiftY){
+    public void moveShip(int shipNum, boolean up){
         if (shipNum < gameObjects.size() && gameObjects.get(shipNum).getType() == GameObjectType.STARSHIP && !isPaused){
             Ship ship = (Ship) gameObjects.get(shipNum);
-            ship.move(shiftX, shiftY);
+            ship.move(up);
         }
     }
     public void rotateShip(int shipNum, double rotation){

@@ -21,7 +21,6 @@ class Starships() : Application() {
     private val imageResolver = CachedImageResolver(DefaultImageResolver())
     private val facade = ElementsViewFacade(imageResolver)
     private val keyTracker = KeyTracker()
-    private var paused = false
 
     companion object {
         val STARSHIP_RED = ImageRef("starship_red", 70.0, 70.0)
@@ -33,15 +32,15 @@ class Starships() : Application() {
     }
 
     override fun start(primaryStage: Stage) {
-        game.start(true);
+        game.start(false);
         val gameObjects = game.gameObjects
         for (gameObject in gameObjects){
             facade.elements[gameObject.id] = ElementModel(gameObject.id, gameObject.getxPosition(), gameObject.getyPosition(), gameObject.height, gameObject.width, gameObject.rotation, adaptShape(gameObject.shape), getImage(gameObject))
         }
 
-        facade.timeListenable.addEventListener(TimeListener(facade.elements, game, this))
+        facade.timeListenable.addEventListener(TimeListener(facade.elements, game))
         facade.collisionsListenable.addEventListener(CollisionListener(game))
-        keyTracker.keyPressedListenable.addEventListener(KeyPressedListener(game, this))
+        keyTracker.keyPressedListenable.addEventListener(KeyPressedListener(game))
 
         val scene = Scene(facade.view)
         keyTracker.scene = scene
@@ -74,7 +73,7 @@ class Starships() : Application() {
     }
 }
 
-class TimeListener(private val elements: Map<String, ElementModel>, private val game: Game, private val starships: Starships) : EventListener<TimePassed> {
+class TimeListener(private val elements: Map<String, ElementModel>, private val game: Game) : EventListener<TimePassed> {
     override fun handle(event: TimePassed) {
         if(game.hasFinished()) {
             game.printLeaderBoard()
@@ -104,31 +103,26 @@ class CollisionListener(private val game: Game) : EventListener<Collision> {
 
 }
 
-class KeyPressedListener(private val game: Game, private val starships: Starships): EventListener<KeyPressed> {
+class KeyPressedListener(private val game: Game): EventListener<KeyPressed> {
     override fun handle(event: KeyPressed) {
+        val map = game.keyBoardConfig;
+        if (event.key == KeyCode.S && game.isPaused) game.saveGame()
         when(event.key) {
-            KeyCode.W -> game.moveShip(0, 0.0, -5.0)
-            KeyCode.S -> {
-                if (game.isPaused) game.saveGame()
-                else game.moveShip(0, 0.0, 5.0)
-            }
-            KeyCode.A -> game.moveShip(0, -5.0, 0.0)
-            KeyCode.D -> game.moveShip(0, 5.0, 0.0)
-            KeyCode.LEFT -> game.rotateShip(0, -5.0)
-            KeyCode.RIGHT -> game.rotateShip(0, 5.0)
-            KeyCode.SPACE -> game.shoot(0)
+            map["accelerate-1"] -> game.moveShip(0, true)
+            map["stop-1"] -> game.moveShip(0, false)
+            map["rotate-left-1"] -> game.rotateShip(0, -5.0)
+            map["rotate-right-1"] -> game.rotateShip(0, 5.0)
+            map["shoot-1"] -> game.shoot(0)
             KeyCode.P -> game.pauseOrResumeGame()
             else -> {}
         }
         if (game.players.size == 2){
             when(event.key) {
-                KeyCode.T -> game.moveShip(1, 0.0, -5.0)
-                KeyCode.G -> game.moveShip(1, 0.0, 5.0)
-                KeyCode.F -> game.moveShip(1, -5.0, 0.0)
-                KeyCode.H -> game.moveShip(1, 5.0, 0.0)
-                KeyCode.J -> game.rotateShip(1, -5.0)
-                KeyCode.K -> game.rotateShip(1, 5.0)
-                KeyCode.L -> game.shoot(1)
+                map["accelerate-2"] -> game.moveShip(1, true)
+                map["stop-2"] -> game.moveShip(1, false)
+                map["rotate-left-2"] -> game.rotateShip(1, -5.0)
+                map["rotate-right-2"] -> game.rotateShip(1, 5.0)
+                map["shoot-2"] -> game.shoot(1)
                 else -> {}
             }
         }
