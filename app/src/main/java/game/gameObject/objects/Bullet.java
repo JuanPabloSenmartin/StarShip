@@ -45,8 +45,8 @@ public class Bullet extends GameObject {
 
 
     private Bullet move(){
-        double newX = getxPosition() - 2 * Math.sin(Math.PI * 2 * getDirection() / 360);
-        double newY = getyPosition() + 2 * Math.cos(Math.PI * 2 * getDirection() / 360);
+        double newX = getxPosition() - 4 * Math.sin(Math.PI * 2 * getDirection() / 360);
+        double newY = getyPosition() + 4 * Math.cos(Math.PI * 2 * getDirection() / 360);
         return new Bullet(getId(), newX,newY,getRotation(),getHeight(),getWidth(),getDirection(),getColor(),shipId, damage, bulletType);
     }
 

@@ -144,9 +144,11 @@ public class Game {
 
     public void update(){
         if (!isPaused && gameState != null){
+            boolean hasShip = false;
             List<GameObject> newGameObjects = new ArrayList<>();
             boolean entered = false;
             for (GameObject gameObject : getGameObjects()){
+                if (gameObject.getType() == GameObjectType.STARSHIP) hasShip = true;
                 if (gameObject.getType() != GameObjectType.STARSHIP && !entered){
                     manageMeteorSpawn(newGameObjects);
                     entered = true;
@@ -157,6 +159,7 @@ public class Game {
                     addEliminated(gameObject.getId());
                 }
             }
+            if (!hasShip) finishGame();
             if (getGameObjects().size() == getPlayers().size()){
                 manageMeteorSpawn(newGameObjects);
             }

@@ -23,8 +23,8 @@ public class Ship extends GameObject {
     @Override
     public Ship update() {
         if (boost > 0){
-            double newX =  getxPosition() -  1.5 * Math.sin(Math.PI * 2 * getDirection() / 360);
-            double newY =  getyPosition() +  1.5 * Math.cos(Math.PI * 2 * getDirection() / 360);
+            double newX =  getxPosition() -  3.5 * Math.sin(Math.PI * 2 * getDirection() / 360);
+            double newY =  getyPosition() +  3.5 * Math.cos(Math.PI * 2 * getDirection() / 360);
             if (!isInsideLimit(newX, newY)){
                 return new Ship(getId(), getxPosition(), getyPosition(), getRotation(), getHeight(),getWidth(),playerId,getColor(),lastBulletShot, getDirection(), 0, bulletType);
             }

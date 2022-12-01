@@ -31,8 +31,8 @@ public class Meteor extends GameObject {
     }
 
     private Meteor move(){
-        double newX =  getxPosition() + 0.2 * Math.sin(Math.PI * 2 * getDirection() / 360);
-        double newY =  getyPosition() + 0.2 * Math.cos(Math.PI * 2 * getDirection() / 360);
+        double newX =  getxPosition() + 0.7 * Math.sin(Math.PI * 2 * getDirection() / 360);
+        double newY =  getyPosition() + 0.7 * Math.cos(Math.PI * 2 * getDirection() / 360);
         double newRotation;
         if (clockwise) {
             newRotation = getRotation() + 2;

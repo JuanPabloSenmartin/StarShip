@@ -3,30 +3,23 @@ package edu.austral.ingsis.starships
 import edu.austral.ingsis.starships.ui.*
 import edu.austral.ingsis.starships.ui.ElementColliderType.*
 import game.Game
-import game.gameObject.objects.enums.Color
 import game.gameObject.GameObject
-import game.gameObject.objects.enums.GameObjectShape
-import game.gameObject.objects.enums.GameObjectType
 import game.gameObject.objects.Bullet
 import game.gameObject.objects.enums.BulletType
+import game.gameObject.objects.enums.Color
+import game.gameObject.objects.enums.GameObjectShape
+import game.gameObject.objects.enums.GameObjectType
 import javafx.application.Application
 import javafx.application.Application.launch
 import javafx.geometry.Pos
 import javafx.scene.Cursor
-import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.Label
-import javafx.scene.image.Image
-
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
-import javafx.scene.paint.ImagePattern
-import javafx.scene.paint.Paint
-
 import javafx.stage.Stage
-import javax.swing.text.html.ImageView
 import kotlin.system.exitProcess
 
 
@@ -121,7 +114,7 @@ class Starships() : Application() {
         }
     }
     private fun menuScene(primaryStage: Stage, pane: StackPane): Scene {
-        val title = Label("Starships")
+        val title = javafx.scene.control.Label("Starships")
         title.textFill = javafx.scene.paint.Color.PURPLE
         title.style = "-fx-font-family: VT323; -fx-font-size: 100;"
 
