@@ -1,78 +1,56 @@
 package game.gameObject.objects;
 
-import game.gameObject.Color;
+import game.gameObject.objects.enums.Color;
 import game.gameObject.GameObject;
-import game.gameObject.GameObjectShape;
-import game.gameObject.GameObjectType;
+import game.gameObject.objects.enums.GameObjectShape;
+import game.gameObject.objects.enums.GameObjectType;
+import game.gameObject.objects.enums.BulletType;
 
-import java.util.Random;
 
 public class Bullet extends GameObject {
-    private final Ship ship;
-    private int damage;
-    public Bullet(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, Ship ship, double direction, Color color) {
-        super(id, GameObjectType.BULLET, initialPositionX, initialPositionY, initialRotation, true, initialHeight, initialWidth, GameObjectShape.RECTANGULAR, direction, color);
-        this.ship = ship;
-        this.damage = 0;
-    }
-    public Bullet(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, Ship ship, double direction, Color color, boolean isHiding) {
-        super(id, GameObjectType.BULLET, initialPositionX, initialPositionY, initialRotation, isHiding, initialHeight, initialWidth, GameObjectShape.RECTANGULAR, direction, color);
-        this.ship = ship;
-        this.damage = 0;
+    private final String shipId;
+    private final int damage;
+    private final BulletType bulletType;
+
+    public Bullet(String id, double positionX, double positionY, double rotation, double height, double width, double direction, Color color, String shipId, int damage, BulletType bulletType) {
+        super(id, GameObjectType.BULLET, positionX, positionY, rotation, height, width, GameObjectShape.RECTANGULAR, direction, color);
+        this.shipId = shipId;
+        this.damage = damage;
+        this.bulletType = bulletType;
     }
     public String getShipId(){
-        return ship.getId();
+        return shipId;
     }
 
     @Override
-    public void update() {
-        if (!isHiding()){
-            move();
+    public Bullet update() {
+        if (runOutOfLimit()){
+            return null;
         }
+        return move();
     }
-    public void shoot(){
-        Random random = new Random();
-        if (ship.canShoot()){
-            setDirection(ship.getRotation());
-            setRotation(ship.getRotation());
-            setHiding(false);
-            setxPosition(ship.getxPosition()+18);
-            setyPosition(ship.getyPosition());
-            double n = random.nextDouble(5, 15);
-            setHeight(n*3);
-            setWidth(n);
-            setDamage((int) (n*6));
-            ship.shootsBullet();
-        }
+
+    @Override
+    public GameObject getNewGameObject() {
+        return new Bullet(getId(), getxPosition(),getyPosition(),getRotation(),getHeight(),getWidth(),getDirection(),getColor(),shipId, damage, bulletType);
+    }
+
+    public BulletType getBulletType() {
+        return bulletType;
     }
 
     public int getDamage() {
         return damage;
     }
 
-    public void setDamage(int damage) {
-        this.damage = damage;
-    }
 
-    private void move(){
-        if (runOutOfLimit()){
-            hide();
-        }
-        else{
-            double newX = getxPosition() - 2 * Math.sin(Math.PI * 2 * getDirection() / 360);
-            double newY = getyPosition() + 2 * Math.cos(Math.PI * 2 * getDirection() / 360);
-            setxPosition(newX);
-            setyPosition(newY);
-        }
+    private Bullet move(){
+        double newX = getxPosition() - 2 * Math.sin(Math.PI * 2 * getDirection() / 360);
+        double newY = getyPosition() + 2 * Math.cos(Math.PI * 2 * getDirection() / 360);
+        return new Bullet(getId(), newX,newY,getRotation(),getHeight(),getWidth(),getDirection(),getColor(),shipId, damage, bulletType);
     }
 
     private boolean runOutOfLimit() {
         return !isInsideLimit();
     }
-
-
-    public Ship getShip() {
-        return ship;
-    }
-
 }

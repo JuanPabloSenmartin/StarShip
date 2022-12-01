@@ -1,6 +1,7 @@
 package game.config;
 
-import game.gameObject.Color;
+import game.gameObject.objects.enums.BulletType;
+import game.gameObject.objects.enums.Color;
 import javafx.scene.input.KeyCode;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ public class GameConfiguration extends Config{
     private final Map<String, KeyCode> keyboardConfiguration;
     private final int amountOfLives;
     private final Map<String, Color> shipColors;
+    private final Map<String, BulletType> bulletTypes;
 
     public GameConfiguration() {
         List<String> lines = getLines("app\\src\\main\\java\\game\\config\\GameConfiguration");
@@ -20,6 +22,29 @@ public class GameConfiguration extends Config{
         this.keyboardConfiguration = getKeyBoardMap(map.get("keyBoardSettings"));
         this.amountOfLives = Integer.parseInt(map.get("amountOfLives"));
         this.shipColors = getShipColorMap(map.get("ships"));
+        this.bulletTypes = getBulletTypesMap(map.get("bulletTypes"));
+    }
+
+    private Map<String, BulletType> getBulletTypesMap(String bulletTypes) {
+        Map<String, BulletType> map = new HashMap<>();
+        String[] split = bulletTypes.split(";");
+        for (String s : split) {
+            String[] innerSplit = s.split("=");
+            map.put(innerSplit[0], getBulletType(innerSplit[1]));
+        }
+        return map;
+    }
+
+    private BulletType getBulletType(String s) {
+        return switch (s) {
+            case "PLASMA" -> BulletType.PLASMA;
+            case "LIGHTNING" -> BulletType.LIGHTNING;
+            default -> BulletType.LASER;
+        };
+    }
+
+    public Map<String, BulletType> getBulletTypes() {
+        return bulletTypes;
     }
 
     public int getAmountOfPlayers() {

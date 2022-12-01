@@ -1,17 +1,30 @@
 package edu.austral.ingsis.starships
 
-import game.Game
 import edu.austral.ingsis.starships.ui.*
 import edu.austral.ingsis.starships.ui.ElementColliderType.*
+import game.Game
+import game.gameObject.objects.enums.Color
 import game.gameObject.GameObject
-import game.gameObject.GameObjectType
-import game.gameObject.Color
-import game.gameObject.GameObjectShape
+import game.gameObject.objects.enums.GameObjectShape
+import game.gameObject.objects.enums.GameObjectType
+import game.gameObject.objects.Bullet
+import game.gameObject.objects.enums.BulletType
 import javafx.application.Application
 import javafx.application.Application.launch
+import javafx.geometry.Pos
+import javafx.scene.Cursor
+import javafx.scene.Parent
 import javafx.scene.Scene
+import javafx.scene.control.Label
+
 import javafx.scene.input.KeyCode
+import javafx.scene.layout.HBox
+import javafx.scene.layout.StackPane
+import javafx.scene.layout.VBox
+
 import javafx.stage.Stage
+import kotlin.system.exitProcess
+
 
 fun main() {
     launch(Starships::class.java)
@@ -27,25 +40,25 @@ class Starships() : Application() {
         val STARSHIP_BLUE = ImageRef("starship_blue", 70.0, 70.0)
         val BULLET_RED = ImageRef("bullet_red", 70.0, 70.0)
         val BULLET_BLUE = ImageRef("bullet_blue", 70.0, 70.0)
+        val BULLET_PLASMA_BLUE = ImageRef("bullet_plasma_blue", 70.0, 70.0)
+        val BULLET_PLASMA_RED = ImageRef("bullet_plasma_red", 70.0, 70.0)
+        val BULLET_LIGHTNING_BLUE = ImageRef("bullet_lightning_blue", 70.0, 70.0)
+        val BULLET_LIGHTNING_RED = ImageRef("bullet_lightning_red", 70.0, 70.0)
         val METEOR = ImageRef("meteor", 70.0, 70.0)
         val game = Game()
     }
 
     override fun start(primaryStage: Stage) {
-        game.start(false);
-        val gameObjects = game.gameObjects
-        for (gameObject in gameObjects){
-            facade.elements[gameObject.id] = ElementModel(gameObject.id, gameObject.getxPosition(), gameObject.getyPosition(), gameObject.height, gameObject.width, gameObject.rotation, adaptShape(gameObject.shape), getImage(gameObject))
-        }
+        val (score, pane, root) = mainGameScene()
+        val menu = menuScene(primaryStage, pane)
 
-        facade.timeListenable.addEventListener(TimeListener(facade.elements, game))
+        facade.timeListenable.addEventListener(TimeListener(facade.elements, game, facade, this))
         facade.collisionsListenable.addEventListener(CollisionListener(game))
-        keyTracker.keyPressedListenable.addEventListener(KeyPressedListener(game))
+        keyTracker.keyPressedListenable.addEventListener(KeyPressedListener(game, this, primaryStage, pane, menu))
 
-        val scene = Scene(facade.view)
-        keyTracker.scene = scene
+        keyTracker.scene = menu
 
-        primaryStage.scene = scene
+        primaryStage.scene = menu
         primaryStage.height = 800.0
         primaryStage.width = 800.0
 
@@ -53,10 +66,14 @@ class Starships() : Application() {
         keyTracker.start()
         primaryStage.show()
     }
+
+
     override fun stop() {
         facade.stop()
         keyTracker.stop()
+        exitProcess(0)
     }
+
     fun adaptShape(shape : GameObjectShape) : ElementColliderType{
         return when(shape){
             GameObjectShape.RECTANGULAR -> Rectangular
@@ -65,31 +82,216 @@ class Starships() : Application() {
         }
     }
     fun getImage(gameObject: GameObject) : ImageRef? {
-        return if (gameObject.type == GameObjectType.STARSHIP && gameObject.color == Color.RED) STARSHIP_RED
-        else if(gameObject.type == GameObjectType.STARSHIP && gameObject.color == Color.BLUE) STARSHIP_BLUE
-        else if (gameObject.type == GameObjectType.BULLET && gameObject.color == Color.RED) BULLET_RED
-        else if (gameObject.type == GameObjectType.BULLET && gameObject.color == Color.BLUE) BULLET_BLUE
-        else METEOR
+        if (gameObject.type == GameObjectType.STARSHIP){
+            if (gameObject.color == Color.RED) return STARSHIP_RED
+            else return STARSHIP_BLUE
+        }
+        if (gameObject.type == GameObjectType.BULLET){
+            var type = BulletType.LASER
+            if (gameObject is Bullet){
+                type = gameObject.bulletType;
+            }
+            if (gameObject.color == Color.RED){
+                return if (type == BulletType.LIGHTNING) BULLET_LIGHTNING_RED
+                else if (type == BulletType.PLASMA) BULLET_PLASMA_RED
+                else BULLET_RED
+            }
+            else{
+                return if (type == BulletType.LIGHTNING) BULLET_LIGHTNING_BLUE
+                else if (type == BulletType.PLASMA) BULLET_PLASMA_BLUE
+                else BULLET_BLUE
+            }
+        }
+        else return METEOR
+    }
+    private fun mainGameScene(): Triple<StackPane, StackPane, Parent> {
+        // Score
+        val score = StackPane()
+//        val txt = Label("0")
+//        txt.style = "-fx-font-family: VT323; -fx-font-size: 50"
+//        txt.textFill = javafx.scene.paint.Color.color(0.9, 0.9, 0.9)
+        //val div = HBox()
+        //div.alignment = Pos.TOP_RIGHT
+        //div.children.addAll(txt)
+        //div.padding = Insets(10.0, 10.0, 10.0, 10.0)
+
+        //val rect = Rectangle(790.0, 750.0)
+        //rect.fill = javafx.scene.paint.Color.TRANSPARENT
+        //rect.stroke = javafx.scene.paint.Color.RED
+        //score.children.addAll(div, rect)
+
+        val pane = StackPane()
+        val root = facade.view
+        pane.children.addAll(root
+            //, score
+        )
+        root.id = "pane"
+        return Triple(score, pane, root)
+    }
+    private fun addGameObjects(){
+        val gameObjects = game.gameObjects
+        for (gameObject in gameObjects){
+            facade.elements[gameObject.id] = ElementModel(gameObject.id, gameObject.getxPosition(), gameObject.getyPosition(), gameObject.height, gameObject.width, gameObject.rotation, adaptShape(gameObject.shape), getImage(gameObject))
+        }
+    }
+    private fun menuScene(primaryStage: Stage, pane: StackPane): Scene {
+        // Menu
+        val title = Label("Starships")
+        title.textFill = javafx.scene.paint.Color.color(0.9, 0.9, 0.9)
+        title.style = "-fx-font-family: VT323; -fx-font-size: 100;"
+
+        val newGame = Label("New Game")
+        newGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        newGame.style = "-fx-font-family: VT323; -fx-font-size: 50"
+        newGame.setOnMouseClicked {
+            primaryStage.scene.root = pane
+            game.start(false)
+            addGameObjects()
+        }
+
+        newGame.setOnMouseEntered {
+            newGame.textFill = javafx.scene.paint.Color.CYAN
+            newGame.cursor = Cursor.HAND
+        }
+
+        newGame.setOnMouseExited {
+            newGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        }
+
+        val loadGame = Label("Load Game")
+        loadGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        loadGame.style = "-fx-font-family: VT323; -fx-font-size: 50;"
+        loadGame.setOnMouseClicked {
+            primaryStage.scene.root = pane
+            game.start(true)
+            addGameObjects()
+        }
+        loadGame.setOnMouseEntered {
+            loadGame.textFill = javafx.scene.paint.Color.CYAN
+            loadGame.cursor = Cursor.HAND
+        }
+
+        loadGame.setOnMouseExited {
+            loadGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        }
+
+        val options = HBox(70.0)
+        options.alignment = Pos.CENTER
+        options.children.addAll(newGame, loadGame)
+
+        val layout = VBox(50.0)
+        layout.id = "menu"
+        layout.alignment = Pos.CENTER
+        layout.children.addAll(
+            title,
+            //logo,
+            options
+        )
+
+        return Scene(layout)
+    }
+    fun pauseScene(primaryStage: Stage, pane: StackPane, menu: Scene): Scene {
+
+        val resume = Label("Resume")
+        resume.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        resume.style = "-fx-font-family: VT323; -fx-font-size: 50"
+        resume.setOnMouseClicked {
+            primaryStage.scene = menu
+            primaryStage.scene.root = pane
+            game.pauseOrResumeGame()
+        }
+
+        resume.setOnMouseEntered {
+            resume.textFill = javafx.scene.paint.Color.CYAN
+            resume.cursor = Cursor.HAND
+        }
+
+        resume.setOnMouseExited {
+            resume.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        }
+        var saved = false
+        val saveGame = Label("Save game")
+        saveGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        saveGame.style = "-fx-font-family: VT323; -fx-font-size: 50;"
+        saveGame.setOnMouseClicked {
+            saveGame.textFill = javafx.scene.paint.Color.PURPLE
+            game.saveGame()
+            saved = true
+        }
+        saveGame.setOnMouseEntered {
+            if (!saved){
+                saveGame.textFill = javafx.scene.paint.Color.CYAN
+                saveGame.cursor = Cursor.HAND
+            }
+        }
+
+        saveGame.setOnMouseExited {
+            if (saved){
+                saveGame.textFill = javafx.scene.paint.Color.PURPLE
+            }
+            else{
+                saveGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+            }
+        }
+
+        val exitGame = Label("Exit game")
+        exitGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        exitGame.style = "-fx-font-family: VT323; -fx-font-size: 50;"
+        exitGame.setOnMouseClicked {
+            game.printLeaderBoard()
+            stop()
+        }
+        exitGame.setOnMouseEntered {
+            exitGame.textFill = javafx.scene.paint.Color.CYAN
+            exitGame.cursor = Cursor.HAND
+        }
+
+        exitGame.setOnMouseExited {
+            exitGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        }
+
+        val layout = VBox(50.0)
+        layout.alignment = Pos.CENTER
+        layout.children.addAll(
+            resume,
+            saveGame,
+            exitGame
+        )
+        return Scene(layout)
     }
 }
 
-class TimeListener(private val elements: Map<String, ElementModel>, private val game: Game) : EventListener<TimePassed> {
+class TimeListener(
+    private val elements: Map<String, ElementModel>,
+    private val game: Game,
+    private val facade: ElementsViewFacade,
+    private val starships: Starships
+) : EventListener<TimePassed> {
     override fun handle(event: TimePassed) {
         if(game.hasFinished()) {
             game.printLeaderBoard()
-            game.resetGame()
+            starships.stop()
         }
         game.update()
-        val gameObjects = game.gameObjects;
+        val gameObjects = game.gameObjects ?: return;
         for (gameObject in gameObjects){
-            val element = elements.get(gameObject.id)
-            val values = gameObject.values
+            val element = elements[gameObject.id]
             if (element != null) {
-                element.x.set(values[0])
-                element.y.set(values[1])
-                element.rotationInDegrees.set(values[2])
-                element.height.set(values[3])
-                element.width.set(values[4])
+                element.x.set(gameObject.getxPosition())
+                element.y.set(gameObject.getyPosition())
+                element.rotationInDegrees.set(gameObject.rotation)
+                element.height.set(gameObject.height)
+                element.width.set(gameObject.width)
+            }
+            else{
+                facade.elements[gameObject.id] = ElementModel(gameObject.id, gameObject.getxPosition(), gameObject.getyPosition(), gameObject.height, gameObject.width, gameObject.rotation, starships.adaptShape(gameObject.shape), starships.getImage(gameObject))
+            }
+        }
+        val eliminations = game.eliminated;
+
+        for (eliminated in eliminations){
+            if (elements.containsKey(eliminated)){
+                facade.elements[eliminated] = null
             }
         }
     }
@@ -97,37 +299,39 @@ class TimeListener(private val elements: Map<String, ElementModel>, private val 
 
 class CollisionListener(private val game: Game) : EventListener<Collision> {
     override fun handle(event: Collision) {
-//        println("${event.element1Id} ${event.element2Id}")
         game.handleCollision(event.element1Id, event.element2Id)
     }
-
 }
 
-class KeyPressedListener(private val game: Game): EventListener<KeyPressed> {
+class KeyPressedListener(
+    private val game: Game,
+    private val starships: Starships,
+    private val primaryStage: Stage,
+    private val pane: StackPane,
+    private val menu: Scene
+): EventListener<KeyPressed> {
     override fun handle(event: KeyPressed) {
         val map = game.keyBoardConfig;
         if (event.key == KeyCode.S && game.isPaused) game.saveGame()
         when(event.key) {
-            map["accelerate-1"] -> game.moveShip(0, true)
-            map["stop-1"] -> game.moveShip(0, false)
-            map["rotate-left-1"] -> game.rotateShip(0, -5.0)
-            map["rotate-right-1"] -> game.rotateShip(0, 5.0)
-            map["shoot-1"] -> game.shoot(0)
-            KeyCode.P -> game.pauseOrResumeGame()
+            map["accelerate-1"] -> game.moveShip("starship-1", true)
+            map["stop-1"] -> game.moveShip("starship-1", false)
+            map["rotate-left-1"] -> game.rotateShip("starship-1", -5.0)
+            map["rotate-right-1"] -> game.rotateShip("starship-1", 5.0)
+            map["shoot-1"] -> game.shoot("starship-1")
+            map["accelerate-2"] -> game.moveShip("starship-2", true)
+            map["stop-2"] -> game.moveShip("starship-2", false)
+            map["rotate-left-2"] -> game.rotateShip("starship-2", -5.0)
+            map["rotate-right-2"] -> game.rotateShip("starship-2", 5.0)
+            map["shoot-2"] -> game.shoot("starship-2")
+            KeyCode.P -> {
+                game.pauseOrResumeGame()
+                if (game.isPaused){
+                    primaryStage.scene = starships.pauseScene(primaryStage, pane, menu)
+                }
+            }
             else -> {}
         }
-        if (game.players.size == 2){
-            when(event.key) {
-                map["accelerate-2"] -> game.moveShip(1, true)
-                map["stop-2"] -> game.moveShip(1, false)
-                map["rotate-left-2"] -> game.rotateShip(1, -5.0)
-                map["rotate-right-2"] -> game.rotateShip(1, 5.0)
-                map["shoot-2"] -> game.shoot(1)
-                else -> {}
-            }
-        }
+
     }
-
-
-
 }

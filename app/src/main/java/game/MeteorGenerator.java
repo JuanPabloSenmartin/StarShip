@@ -1,7 +1,7 @@
 package game;
 
 import game.gameObject.GameObject;
-import game.gameObject.GameObjectType;
+import game.gameObject.objects.enums.GameObjectType;
 import game.gameObject.objects.Meteor;
 import game.gameObject.objects.Ship;
 
@@ -10,16 +10,12 @@ import java.util.List;
 import java.util.Random;
 
 public class MeteorGenerator {
+    private static int count = 0;
     static Random random = new Random();
-    public static void manageMeteorGeneration(List<GameObject> gameObjects){
-        if (getAmountOfVisibleMeteors(gameObjects) < 5){
+    public static void manageMeteorGeneration(List<Meteor> meteors, List<GameObject> gameObjects){
+        if (meteors.size() < 5){
             //adds meteor
-            for (GameObject gameObject : gameObjects){
-                if (gameObject.getType().equals(GameObjectType.METEOR) && gameObject.isHiding()) {
-                    putOnScreen((Meteor) gameObject, getShipsList(gameObjects));
-                    break;
-                }
-            }
+            addNewMeteor(gameObjects);
         }
     }
     private static List<Ship> getShipsList(List<GameObject> gameObjects){
@@ -29,11 +25,12 @@ public class MeteorGenerator {
         }
         return ships;
     }
-    private static void putOnScreen(Meteor meteor, List<Ship> ships) {
+    private static void addNewMeteor(List<GameObject> gameObjects) {
+        List<Ship> ships = getShipsList(gameObjects);
         double x;
         double y;
-        double direction;
         Ship targetedShip = getRandomShip(ships);
+        if (targetedShip == null) return;
         int side = random.nextInt(4);
         double n = random.nextDouble(800);
         switch (side){
@@ -58,34 +55,24 @@ public class MeteorGenerator {
                 y = n;
             }
         }
-        direction = getDirection(x,y, targetedShip);
-        setMeteorValues(meteor, x, y, direction);
+        double direction = getDirection(x,y, targetedShip);
+        String id = "meteor-" + ++count;
+        double height = random.nextDouble(50, 150);
+        double width = random.nextDouble(50, 150);
+        int healthBar = calculateHealthBar(width,height);
+        gameObjects.add(new Meteor(id, x, y, 180, height,width,direction, random.nextBoolean(), healthBar,healthBar));
     }
 
     private static Ship getRandomShip(List<Ship> ships) {
-        return ships.get(random.nextInt(ships.size()));
+        return ships.isEmpty() ? null : ships.get(random.nextInt(ships.size()));
     }
 
     private static double getDirection(double x, double y, Ship target) {
         return Math.toDegrees(Math.atan2(target.getxPosition() - x, target.getyPosition() - y)) + random.nextDouble(20);
     }
-
-    private static void setMeteorValues(Meteor meteor, double x, double y, double direction) {
-        meteor.setHiding(false);
-        meteor.setDirection(direction);
-        meteor.setxPosition(x);
-        meteor.setyPosition(y);
-        meteor.setClockwise(random.nextBoolean());
-        meteor.setWidth(random.nextDouble(50, 150));
-        meteor.setHeight(random.nextDouble(50, 150));
-        meteor.setInitialHealthBar(meteor.calculateHealthBar());
+    private static int calculateHealthBar(double width, double height){
+        //average would be 100 health
+        return (int) ((width * height)/100);
     }
 
-    private static int getAmountOfVisibleMeteors(List<GameObject> gameObjects){
-        int sum = 0;
-        for (GameObject gameObject : gameObjects){
-            if (gameObject.getType().equals(GameObjectType.METEOR) && !gameObject.isHiding()) sum++;
-        }
-        return sum;
-    }
 }

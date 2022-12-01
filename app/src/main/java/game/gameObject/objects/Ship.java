@@ -1,74 +1,72 @@
 package game.gameObject.objects;
 
-import game.gameObject.Color;
+import game.gameObject.objects.enums.BulletType;
+import game.gameObject.objects.enums.Color;
 import game.gameObject.GameObject;
-import game.gameObject.GameObjectShape;
-import game.gameObject.GameObjectType;
+import game.gameObject.objects.enums.GameObjectShape;
+import game.gameObject.objects.enums.GameObjectType;
 
 public class Ship extends GameObject {
-    private long lastBulletShot;
+    private final long lastBulletShot;
     private final String playerId;
-    private double boost;
+    private final double boost;
+    private final BulletType bulletType;
 
-    public Ship(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, String playerId, Color color) {
-        super(id, GameObjectType.STARSHIP, initialPositionX, initialPositionY, initialRotation, false, initialHeight, initialWidth, GameObjectShape.TRIANGULAR, initialRotation, color);
-        this.playerId = playerId;
-        this.lastBulletShot = System.currentTimeMillis();
-        this.boost = 0;
-    }
-    public Ship(String id, double initialPositionX, double initialPositionY, double initialRotation, double initialHeight, double initialWidth, String playerId, Color color, long lastBulletShot, boolean isHiding, double direction) {
-        super(id, GameObjectType.STARSHIP, initialPositionX, initialPositionY, initialRotation, isHiding, initialHeight, initialWidth, GameObjectShape.TRIANGULAR, direction, color);
+    public Ship(String id,  double positionX, double positionY, double rotation, double height, double width, String playerId, Color color, long lastBulletShot, double direction, double boost, BulletType bulletType) {
+        super(id, GameObjectType.STARSHIP, positionX, positionY, rotation, height, width, GameObjectShape.TRIANGULAR, direction, color);
         this.playerId = playerId;
         this.lastBulletShot = lastBulletShot;
-        this.boost = 0;
+        this.boost = boost;
+        this.bulletType = bulletType;
     }
 
     @Override
-    public void update() {
+    public Ship update() {
         if (boost > 0){
             double newX =  getxPosition() -  1.5 * Math.sin(Math.PI * 2 * getDirection() / 360);
             double newY =  getyPosition() +  1.5 * Math.cos(Math.PI * 2 * getDirection() / 360);
             if (!isInsideLimit(newX, newY)){
-                this.boost = 0;
+                return new Ship(getId(), getxPosition(), getyPosition(), getRotation(), getHeight(),getWidth(),playerId,getColor(),lastBulletShot, getDirection(), 0, bulletType);
             }
             else{
-                setxPosition(newX);
-                setyPosition(newY);
-                this.boost -= 5;
+                return new Ship(getId(), newX, newY, getRotation(), getHeight(),getWidth(),playerId,getColor(),lastBulletShot, getDirection(), boost - 5, bulletType);
             }
         }
+        return (Ship) getNewGameObject();
     }
-    public void move(boolean up){
-        if (up) addBoost();
-        else slowDown();
 
+    @Override
+    public GameObject getNewGameObject() {
+        return new Ship(getId(), getxPosition(), getyPosition(), getRotation(), getHeight(),getWidth(),playerId,getColor(),lastBulletShot, getDirection(), boost, bulletType);
     }
-    public void addBoost(){
+
+    public Ship move(boolean up){
+        if (up) {
+            return addBoost();
+        }
+        else return slowDown();
+    }
+    public Ship addBoost(){
         if (boost < 1000){
-            this.boost += 70;
+            return new Ship(getId(), getxPosition(), getyPosition(), getRotation(), getHeight(),getWidth(),getPlayerId(),getColor(),getLastBulletShot(), getDirection(), boost + 70, bulletType);
         }
+        return (Ship) getNewGameObject();
     }
-    public void slowDown(){
+
+    public Ship slowDown(){
         if (boost > 0){
-            this.boost -= 170;
+            return new Ship(getId(), getxPosition(), getyPosition(), getRotation(), getHeight(),getWidth(),getPlayerId(),getColor(),getLastBulletShot(), getDirection(), boost - 170, bulletType);
         }
+        return (Ship) getNewGameObject();
     }
-    public void rotate(double rotation){
-        setRotation(getRotation() + rotation);
-        setDirection(getRotation());
+    public Ship rotate(double rotation){
+        return new Ship(getId(), getxPosition(), getyPosition(), getRotation() + rotation, getHeight(),getWidth(),playerId,getColor(),lastBulletShot, getDirection() + rotation, boost, bulletType);
     }
-    public void shootsBullet(){
-        this.lastBulletShot = System.currentTimeMillis();
+    public Ship shootsBullet(){
+        return new Ship(getId(), getxPosition(), getyPosition(), getRotation(), getHeight(),getWidth(),playerId,getColor(),System.currentTimeMillis(), getDirection(), boost, bulletType);
     }
     public boolean canShoot(){
         return System.currentTimeMillis() - lastBulletShot > 500;
-    }
-    public void resetShipPosition(){
-        setxPosition(300);
-        setyPosition(300);
-        setRotation(180);
-        setDirection(180);
-        this.boost = 0;
     }
     public String getPlayerId() {
         return playerId;
@@ -76,5 +74,13 @@ public class Ship extends GameObject {
 
     public long getLastBulletShot() {
         return lastBulletShot;
+    }
+
+    public double getBoost() {
+        return boost;
+    }
+
+    public BulletType getBulletType() {
+        return bulletType;
     }
 }

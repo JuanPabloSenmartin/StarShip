@@ -15,7 +15,6 @@ repositories {
         credentials {
             username = project.properties["github.user"] as String? ?: System.getenv("GITHUB_USER")
             password = project.properties["github.token"] as String? ?: System.getenv("GITHUB_TOKEN")
-            //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
         }
     }
 }
@@ -28,7 +27,7 @@ dependencies {
 
 javafx {
     version = "18"
-    modules = listOf("javafx.graphics")
+    modules = listOf("javafx.graphics", "javafx.controls")
 }
 
 application {
