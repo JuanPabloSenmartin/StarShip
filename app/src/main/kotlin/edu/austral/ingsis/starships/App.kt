@@ -16,13 +16,17 @@ import javafx.scene.Cursor
 import javafx.scene.Parent
 import javafx.scene.Scene
 import javafx.scene.control.Label
+import javafx.scene.image.Image
 
 import javafx.scene.input.KeyCode
 import javafx.scene.layout.HBox
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
+import javafx.scene.paint.ImagePattern
+import javafx.scene.paint.Paint
 
 import javafx.stage.Stage
+import javax.swing.text.html.ImageView
 import kotlin.system.exitProcess
 
 
@@ -57,7 +61,6 @@ class Starships() : Application() {
         keyTracker.keyPressedListenable.addEventListener(KeyPressedListener(game, this, primaryStage, pane, menu))
 
         keyTracker.scene = menu
-
         primaryStage.scene = menu
         primaryStage.height = 800.0
         primaryStage.width = 800.0
@@ -118,9 +121,8 @@ class Starships() : Application() {
         }
     }
     private fun menuScene(primaryStage: Stage, pane: StackPane): Scene {
-        // Menu
         val title = Label("Starships")
-        title.textFill = javafx.scene.paint.Color.RED
+        title.textFill = javafx.scene.paint.Color.PURPLE
         title.style = "-fx-font-family: VT323; -fx-font-size: 100;"
 
         val newGame = Label("New Game")
@@ -133,7 +135,7 @@ class Starships() : Application() {
         }
 
         newGame.setOnMouseEntered {
-            newGame.textFill = javafx.scene.paint.Color.CYAN
+            newGame.textFill = javafx.scene.paint.Color.MEDIUMPURPLE
             newGame.cursor = Cursor.HAND
         }
 
@@ -150,7 +152,7 @@ class Starships() : Application() {
             addGameObjects()
         }
         loadGame.setOnMouseEntered {
-            loadGame.textFill = javafx.scene.paint.Color.CYAN
+            loadGame.textFill = javafx.scene.paint.Color.MEDIUMPURPLE
             loadGame.cursor = Cursor.HAND
         }
 
@@ -167,12 +169,13 @@ class Starships() : Application() {
         verticalLayout.alignment = Pos.CENTER
         verticalLayout.children.addAll(title, newAndLoadGame)
 
-        return Scene(verticalLayout)
+        val menu = Scene(verticalLayout)
+        menu.stylesheets.add(this::class.java.classLoader.getResource("styles.css")?.toString())
+        return menu
     }
     fun pauseScene(primaryStage: Stage, pane: StackPane, menu: Scene): Scene {
-
         val resume = Label("Resume")
-        resume.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        resume.textFill = javafx.scene.paint.Color.BLUE
         resume.style = "-fx-font-family: VT323; -fx-font-size: 50"
         resume.setOnMouseClicked {
             primaryStage.scene = menu
@@ -181,16 +184,16 @@ class Starships() : Application() {
         }
 
         resume.setOnMouseEntered {
-            resume.textFill = javafx.scene.paint.Color.CYAN
+            resume.textFill = javafx.scene.paint.Color.MEDIUMPURPLE
             resume.cursor = Cursor.HAND
         }
 
         resume.setOnMouseExited {
-            resume.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+            resume.textFill = javafx.scene.paint.Color.BLUE
         }
         var saved = false
         val saveGame = Label("Save game")
-        saveGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        saveGame.textFill = javafx.scene.paint.Color.BLUE
         saveGame.style = "-fx-font-family: VT323; -fx-font-size: 50;"
         saveGame.setOnMouseClicked {
             saveGame.textFill = javafx.scene.paint.Color.PURPLE
@@ -199,7 +202,7 @@ class Starships() : Application() {
         }
         saveGame.setOnMouseEntered {
             if (!saved){
-                saveGame.textFill = javafx.scene.paint.Color.CYAN
+                saveGame.textFill = javafx.scene.paint.Color.MEDIUMPURPLE
                 saveGame.cursor = Cursor.HAND
             }
         }
@@ -209,34 +212,37 @@ class Starships() : Application() {
                 saveGame.textFill = javafx.scene.paint.Color.PURPLE
             }
             else{
-                saveGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+                saveGame.textFill = javafx.scene.paint.Color.BLUE
             }
         }
 
         val exitGame = Label("Exit game")
-        exitGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+        exitGame.textFill = javafx.scene.paint.Color.BLUE
         exitGame.style = "-fx-font-family: VT323; -fx-font-size: 50;"
         exitGame.setOnMouseClicked {
             game.printLeaderBoard()
             stop()
         }
         exitGame.setOnMouseEntered {
-            exitGame.textFill = javafx.scene.paint.Color.CYAN
+            exitGame.textFill = javafx.scene.paint.Color.MEDIUMPURPLE
             exitGame.cursor = Cursor.HAND
         }
 
         exitGame.setOnMouseExited {
-            exitGame.textFill = javafx.scene.paint.Color.color(0.7, 0.7, 0.7)
+            exitGame.textFill = javafx.scene.paint.Color.BLUE
         }
 
-        val layout = VBox(50.0)
-        layout.alignment = Pos.CENTER
-        layout.children.addAll(
+        val verticalLayout = VBox(50.0)
+        verticalLayout.id = "pause"
+        verticalLayout.alignment = Pos.CENTER
+        verticalLayout.children.addAll(
             resume,
             saveGame,
             exitGame
         )
-        return Scene(layout)
+        val pause = Scene(verticalLayout)
+        pause.stylesheets.add(this::class.java.classLoader.getResource("styles.css")?.toString())
+        return pause
     }
 }
 
