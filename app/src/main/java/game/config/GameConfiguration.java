@@ -87,18 +87,7 @@ public class GameConfiguration extends Config{
         return map;
     }
     private KeyCode getKeyCode(String str){
-        return switch (str){
-            case "W" -> KeyCode.W;
-            case "S" -> KeyCode.S;
-            case "SPACE" -> KeyCode.SPACE;
-            case "LEFT" -> KeyCode.LEFT;
-            case "RIGHT" -> KeyCode.RIGHT;
-            case "T" -> KeyCode.T;
-            case "G" -> KeyCode.G;
-            case "L" -> KeyCode.L;
-            case "J" -> KeyCode.J;
-            default -> KeyCode.K;
-        };
+        return KeyCode.getKeyCode(str);
     }
     private Map<String, String> getMap(List<String> lines) {
         Map<String, String> map = new HashMap<>();
